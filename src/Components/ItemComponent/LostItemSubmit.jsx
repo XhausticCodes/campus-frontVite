@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaBoxOpen } from "react-icons/fa6";
 import {
-  foundItemSubmission,
+  lostItemSubmission,
   itemIdGenerator,
 } from "../../Services/ItemService";
 import { getUserDetails } from "../../Services/LoginService";
@@ -29,12 +29,12 @@ const LostItemSubmit = () => {
     color: "",
     brand: "",
     location: "",
-    foundDate: new Date(),
+    lostDate: new Date(),
     entryDate: new Date(),
   });
 
-  let [fdate, setFdate] = useState(new Date().toISOString().split("T")[0]);
-  let [edate, setEdate] = useState(new Date().toISOString().split("T")[0]);
+  let [ldate, setLdate] = useState(new Date());
+  let [edate, setEdate] = useState(new Date());
 
   // Generate ItemId
   const setFoundItemId = () => {
@@ -90,11 +90,11 @@ const LostItemSubmit = () => {
         : undefined,
       username: campusUser.username,
       userEmail: campusUser.email,
-      foundDate: fdate,
+      lostDate: ldate,
       entryDate: edate,
     };
 
-    return foundItemSubmission(finalItem).then(() => {
+    return lostItemSubmission(finalItem).then(() => {
       alert("Found Item Submitted Successfully!");
       navigate("/StudentMenu");
     });
@@ -105,8 +105,8 @@ const LostItemSubmit = () => {
     let tempErrors = {};
     let isValid = true;
 
-    if (!fdate) {
-      tempErrors.foundDate = "Found Date is required";
+    if (!ldate) {
+      tempErrors.lostDate = "Found Date is required";
       isValid = false;
     }
     if (!edate) {
@@ -119,6 +119,18 @@ const LostItemSubmit = () => {
     }
     if (!String(item.location || "").trim()) {
       tempErrors.location = "Location is required";
+      isValid = false;
+    }
+    if (!String(item.category || "").trim()) {
+      tempErrors.category = "Item Category is required";
+      isValid = false;
+    }
+    if (!String(item.brand || "").trim()) {
+      tempErrors.brand = "Item Brand is required";
+      isValid = false;
+    }
+    if (!String(item.color || "").trim()) {
+      tempErrors.color = "Item Color is required";
       isValid = false;
     }
 
@@ -140,7 +152,7 @@ const LostItemSubmit = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-8 space-y-6">
+      <div className="w-full bg-white rounded-xl shadow-lg p-8 space-y-6">
         <div className="flex flex-col items-center">
           <div className="flex items-center justify-center w-16 h-16 mb-4 bg-indigo-100 rounded-full">
             <FaBoxOpen size={35} className="text-indigo-600" />
@@ -151,146 +163,162 @@ const LostItemSubmit = () => {
           <p className="text-gray-500 mt-2">Campus Lost & Found Portal</p>
         </div>
 
-        <form onSubmit={handleValidation} className="space-y-4">
+        <form onSubmit={handleValidation} className="">
           {/* User & Date Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className={labelStyles}>Generated Item ID</label>
-              <input
-                className={`${inputStyles} bg-gray-100 cursor-not-allowed`}
-                value={newId}
-                readOnly
-              />
+          <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-rows-1 md:grid-rows-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className={labelStyles}>Generated Item ID</label>
+                  <input
+                    className={`${inputStyles} bg-gray-100 cursor-not-allowed`}
+                    value={newId}
+                    readOnly
+                  />
+                </div>
+                <div>
+                  <label className={labelStyles}>User Name</label>
+                  <input
+                    className={`${inputStyles} bg-gray-100 cursor-not-allowed`}
+                    value={item.username}
+                    readOnly
+                  />
+                </div>
+                <div>
+                  <label className={labelStyles}>User Email</label>
+                  <input
+                    className={`${inputStyles} bg-gray-100 cursor-not-allowed`}
+                    value={item.userEmail}
+                    readOnly
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="lostDate" className={labelStyles}>
+                    Select Lost Date
+                  </label>
+                  <input
+                    id="lostDate"
+                    type="date"
+                    className={inputStyles}
+                    value={ldate}
+                    onChange={(event) => {
+                      if (errors.lostDate) {
+                        setErrors((prev) => ({ ...prev, lostDate: undefined }));
+                      }
+                      setLdate(event.target.value);
+                    }}
+                  />
+                  {errors.lostDate && (
+                    <p className={errorStyles}>{errors.lostDate}</p>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="entryDate" className={labelStyles}>
+                    Select Entry Date
+                  </label>
+                  <input
+                    id="entryDate"
+                    type="date"
+                    className={inputStyles}
+                    value={edate}
+                    onChange={(event) => {
+                      if (errors.entryDate) {
+                        setErrors((prev) => ({
+                          ...prev,
+                          entryDate: undefined,
+                        }));
+                      }
+                      setEdate(event.target.value);
+                    }}
+                  />
+                  {errors.entryDate && (
+                    <p className={errorStyles}>{errors.entryDate}</p>
+                  )}
+                </div>
+              </div>
             </div>
-            <div>
-              <label className={labelStyles}>User Name</label>
-              <input
-                className={`${inputStyles} bg-gray-100 cursor-not-allowed`}
-                value={item.username}
-                readOnly
-              />
-            </div>
-            <div>
-              <label className={labelStyles}>User Email</label>
-              <input
-                className={`${inputStyles} bg-gray-100 cursor-not-allowed`}
-                value={item.userEmail}
-                readOnly
-              />
-            </div>
-            <div>
-              <label htmlFor="foundDate" className={labelStyles}>
-                Select Found Date
-              </label>
-              <input
-                id="foundDate"
-                type="date"
-                className={inputStyles}
-                value={fdate}
-                onChange={(event) => {
-                  if (errors.foundDate) {
-                    setErrors((prev) => ({ ...prev, foundDate: undefined }));
-                  }
-                  setFdate(event.target.value);
-                }}
-              />
-              {errors.foundDate && (
-                <p className={errorStyles}>{errors.foundDate}</p>
-              )}
-            </div>
-            <div>
-              <label htmlFor="entryDate" className={labelStyles}>
-                Select Entry Date
-              </label>
-              <input
-                id="entryDate"
-                type="date"
-                className={inputStyles}
-                value={edate}
-                onChange={(event) => {
-                  if (errors.entryDate) {
-                    setErrors((prev) => ({ ...prev, entryDate: undefined }));
-                  }
-                  setEdate(event.target.value);
-                }}
-              />
-              {errors.entryDate && (
-                <p className={errorStyles}>{errors.entryDate}</p>
-              )}
-            </div>
-          </div>
 
-          {/* Item Description Section */}
-          <div className="border-t border-gray-200 pt-6">
-            <h4 className="text-xl font-semibold text-gray-800 mb-4">
-              Item Description
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="itemName" className={labelStyles}>
-                  Item Name *
-                </label>
-                <input
-                  id="itemName"
-                  name="itemName"
-                  className={inputStyles}
-                  value={item.itemName}
-                  onChange={onChangeHandler}
-                />
-                {errors.itemName && (
-                  <p className={errorStyles}>{errors.itemName}</p>
-                )}
-              </div>
-              <div>
-                <label htmlFor="location" className={labelStyles}>
-                  Location Found *
-                </label>
-                <input
-                  id="location"
-                  name="location"
-                  className={inputStyles}
-                  value={item.location}
-                  onChange={onChangeHandler}
-                />
-                {errors.location && (
-                  <p className={errorStyles}>{errors.location}</p>
-                )}
-              </div>
-              <div>
-                <label htmlFor="category" className={labelStyles}>
-                  Category
-                </label>
-                <input
-                  id="category"
-                  name="category"
-                  className={inputStyles}
-                  value={item.category}
-                  onChange={onChangeHandler}
-                />
-              </div>
-              <div>
-                <label htmlFor="color" className={labelStyles}>
-                  Color
-                </label>
-                <input
-                  id="color"
-                  name="color"
-                  className={inputStyles}
-                  value={item.color}
-                  onChange={onChangeHandler}
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label htmlFor="brand" className={labelStyles}>
-                  Brand
-                </label>
-                <input
-                  id="brand"
-                  name="brand"
-                  className={inputStyles}
-                  value={item.brand}
-                  onChange={onChangeHandler}
-                />
+            {/* Item Description Section */}
+            <div className="border-gray-200 border-l pl-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="itemName" className={labelStyles}>
+                    Item Name *
+                  </label>
+                  <input
+                    id="itemName"
+                    name="itemName"
+                    className={inputStyles}
+                    value={item.itemName}
+                    onChange={onChangeHandler}
+                  />
+                  {errors.itemName && (
+                    <p className={errorStyles}>{errors.itemName}</p>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="category" className={labelStyles}>
+                    Category
+                  </label>
+                  <input
+                    id="category"
+                    name="category"
+                    className={inputStyles}
+                    value={item.category}
+                    onChange={onChangeHandler}
+                  />
+                  {errors.category && (
+                    <p className={errorStyles}>{errors.category}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <label htmlFor="color" className={labelStyles}>
+                    Color
+                  </label>
+                  <input
+                    id="color"
+                    name="color"
+                    className={inputStyles}
+                    value={item.color}
+                    onChange={onChangeHandler}
+                  />
+                  {errors.color && (
+                    <p className={errorStyles}>{errors.color}</p>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="brand" className={labelStyles}>
+                    Brand
+                  </label>
+                  <input
+                    id="brand"
+                    name="brand"
+                    className={inputStyles}
+                    value={item.brand}
+                    onChange={onChangeHandler}
+                  />
+                  {errors.brand && (
+                    <p className={errorStyles}>{errors.brand}</p>
+                  )}
+                </div>
+                <div className="md:col-span-2">
+                  <label htmlFor="location" className={labelStyles}>
+                    Location of Lost
+                  </label>
+                  <input
+                    id="location"
+                    name="location"
+                    className={inputStyles}
+                    value={item.location}
+                    onChange={onChangeHandler}
+                  />
+                  {errors.location && (
+                    <p className={errorStyles}>{errors.location}</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -298,6 +326,7 @@ const LostItemSubmit = () => {
           <button
             type="submit"
             disabled={isSubmitting}
+            style={{ cursor: "pointer" }}
             className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out mt-6"
           >
             {isSubmitting ? "Submitting..." : "Submit Found Item"}

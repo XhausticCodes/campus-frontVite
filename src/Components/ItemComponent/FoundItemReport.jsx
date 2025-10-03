@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-import "../../LoginView.css";
+import { FaBox } from "react-icons/fa6"; // icon for found items
 import { foundItemList } from "../../Services/ItemService";
 
 const FoundItemReport = () => {
@@ -23,58 +22,72 @@ const FoundItemReport = () => {
   };
 
   return (
-    <div className="text-center">
-      <h2 className="text-center">Found Item List</h2>
-      <hr
-        style={{
-          height: "3px",
-          borderWidth: 0,
-          color: "yellow",
-          backgroundColor: "red",
-        }}
-      />
-      <div className="row">
-        <table className="table table-striped table-bordered">
-          <thead>
-            <tr>
-              <th>Item Id</th>
-              <th>Item Name</th>
-              <th>Category</th>
-              <th>Color</th>
-              <th>Brand</th>
-              <th>Location</th>
-              <th>Found Date</th>
-              <th>EntryDate</th>
-              <th>User Id</th>
-              <th>Email</th>
-            </tr>
-          </thead>
-          <tbody>
-            {itemList.map((item) => (
-              <tr key={item.itemId}>
-                <td>{item.itemId}</td>
-                <td>{item.itemName}</td>
-                <td>{item.category}</td>
-                <td>{item.color}</td>
-                <td>{item.brand}</td>
-                <td>{item.location}</td>
-                <td>{item.foundDate}</td>
-                <td>{item.entryDate}</td>
-                <td>{item.username}</td>
-                <td>{item.userEmail}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+      <div className="w-full max-w-6xl bg-white rounded-xl shadow-lg p-8 space-y-6">
+        {/* Header */}
+        <div className="flex flex-col items-center">
+          <div className="flex items-center justify-center w-16 h-16 mb-4 bg-indigo-100 rounded-full">
+            <FaBox size={35} className="text-indigo-600" />
+          </div>
+          <h2 className="text-3xl font-bold text-gray-800 text-center">
+            Found Item Report
+          </h2>
+          <p className="text-gray-500 mt-2">All Reported Found Items</p>
+        </div>
 
-        <br />
-        <button
-          style={{ marginLeft: "10px" }}
-          onClick={returnBack}
-          className="btn btn-success"
-        >
-          Return
-        </button>
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden">
+            <thead className="bg-indigo-600 text-white">
+              <tr>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Item Id</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Item Name</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Category</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Color</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Brand</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Location</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Found Date</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Entry Date</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">User</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Email</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 text-sm text-gray-700">
+              {itemList.length > 0 ? (
+                itemList.map((item) => (
+                  <tr key={item.itemId} className="hover:bg-gray-50 transition">
+                    <td className="px-4 py-3">{item.itemId}</td>
+                    <td className="px-4 py-3">{item.itemName}</td>
+                    <td className="px-4 py-3">{item.category}</td>
+                    <td className="px-4 py-3">{item.color}</td>
+                    <td className="px-4 py-3">{item.brand}</td>
+                    <td className="px-4 py-3">{item.location}</td>
+                    <td className="px-4 py-3">{item.foundDate}</td>
+                    <td className="px-4 py-3">{item.entryDate}</td>
+                    <td className="px-4 py-3">{item.username}</td>
+                    <td className="px-4 py-3">{item.userEmail}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="10" className="px-4 py-6 text-center text-gray-500">
+                    No found items available.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Return Button */}
+        <div className="flex justify-end">
+          <button
+            onClick={returnBack}
+            className="bg-indigo-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-indigo-700 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Return
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,20 +1,212 @@
-import React from "react";
-//import Nav from "react-bootstrap/Nav";
-//import Navbar from "react-bootstrap/Navbar";
-//import NavDropdown from "react-bootstrap/NavDropdown";
+import React, { useState } from "react";
+import { ChevronDown } from "lucide-react";
 
 const AdminMenu = () => {
+  const [openDropdown, setOpenDropdown] = useState(null);
+
+  const toggleDropdown = (dropdownName) => {
+    setOpenDropdown(openDropdown === dropdownName ? null : dropdownName);
+  };
+
   return (
-    <div className=".container">
-      <br />
-      <div align="center" style={{ backgroundColor: "green" }}>
-        <h1 className="text-center" style={{ color: "burlywood" }}>
-          <u>
-            <i>Lost Found Admin Menu</i>
-          </u>
+    <div className=" mx-auto px-4">
+      <div className="text-center bg-green-200 py-4">
+        <h1 className="text-center text-4xl font-bold text-green-500 underline italic">
+          Lost Found Admin Menu
         </h1>
       </div>
+
+      {/* Navigation Bar */}
+      <nav className="bg-yellow-400 py-2">
+        <div>
+          <div className="flex items-center justify-between px-4">
+            <div className="relative">
+              <button
+                onClick={() => toggleDropdown("items1")}
+                className="flex items-center px-3 py-2 text-black font-bold hover:bg-yellow-500 rounded"
+              >
+                Items
+                <ChevronDown className="w-4 h-4 ml-1" />
+              </button>
+              {openDropdown === "items1" && (
+                <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded shadow-lg z-50 border border-gray-200">
+                  <div className="py-2">
+                    <div className="px-4 py-2 bg-gray-100 border-b border-gray-200">
+                      <span className="font-bold text-gray-800">Items</span>
+                    </div>
+                    <a
+                      href="/LostSubmit"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      Lost Item Registration
+                    </a>
+                    <a
+                      href="/Found-Submit/:id"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      Found Item Submission
+                    </a>
+                    <a
+                      href=""
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      Lost Item Track
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="relative">
+              <button
+                onClick={() => toggleDropdown("student")}
+                className="flex items-center px-3 py-2 text-black font-bold hover:bg-yellow-500 rounded"
+              >
+                Student
+                <ChevronDown className="w-4 h-4 ml-1" />
+              </button>
+              {openDropdown === "student" && (
+                <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded shadow-lg z-50 border border-gray-200">
+                  <div className="py-2">
+                    <div className="px-4 py-2 bg-gray-100 border-b border-gray-200">
+                      <span className="font-bold text-gray-800">Student</span>
+                    </div>
+                    <a
+                      href=""
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      Student List
+                    </a>
+                    <a
+                      href=""
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      Remove Student
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="relative">
+              <button
+                onClick={() => toggleDropdown("lost-item")}
+                className="flex items-center px-3 py-2 text-black font-bold hover:bg-yellow-500 rounded"
+              >
+                Lost-Item
+                <ChevronDown className="w-4 h-4 ml-1" />
+              </button>
+              {openDropdown === "lost-item" && (
+                <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded shadow-lg z-50 border border-gray-200">
+                  <div className="py-2">
+                    <div className="px-4 py-2 bg-gray-100 border-b border-gray-200">
+                      <span className="font-bold text-gray-800">
+                        Lost Items
+                      </span>
+                    </div>
+                    <a
+                      href=""
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      Lost Item Registration
+                    </a>
+                    <a
+                      href=""
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      Lost Item List
+                    </a>
+                    <a
+                      href=""
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      Lost Item Track
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="relative">
+              <button
+                onClick={() => toggleDropdown("found-item")}
+                className="flex items-center px-3 py-2 text-black font-bold hover:bg-yellow-500 rounded"
+              >
+                Found-Item
+                <ChevronDown className="w-4 h-4 ml-1" />
+              </button>
+              {openDropdown === "found-item" && (
+                <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded shadow-lg z-50 border border-gray-200">
+                  <div className="py-2">
+                    <div className="px-4 py-2 bg-gray-100 border-b border-gray-200">
+                      <span className="font-bold text-gray-800">
+                        Found Items
+                      </span>
+                    </div>
+                    <a
+                      href=""
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      Found Item Submission
+                    </a>
+                    <a
+                      href=""
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      Found Item List
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="relative">
+              <button
+                onClick={() => toggleDropdown("report")}
+                className="flex items-center px-3 py-2 text-black font-bold hover:bg-yellow-500 rounded"
+              >
+                Report
+                <ChevronDown className="w-4 h-4 ml-1" />
+              </button>
+              {openDropdown === "report" && (
+                <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded shadow-lg z-50 border border-gray-200">
+                  <div className="py-2">
+                    <div className="px-4 py-2 bg-gray-100 border-b border-gray-200">
+                      <span className="font-bold text-gray-800">Report</span>
+                    </div>
+                    <a
+                      href="/LostReport"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      Lost Item Report
+                    </a>
+                    <a
+                      href=""
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      Found Item Report
+                    </a>
+                    <a
+                      href=""
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      Lost Found Analysis
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <a
+              href="/"
+              className="px-3 py-2 text-black font-bold bg-red-500 hover:bg-red-600 rounded"
+            >
+              <b>Logout</b>
+            </a>
+          </div>
+        </div>
+      </nav>
     </div>
   );
 };
+
 export default AdminMenu;
