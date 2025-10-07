@@ -9,7 +9,7 @@ const StudentMenu = () => {
   };
 
   return (
-    <div className=" mx-auto px-4">
+    <div className=" mx-auto ">
       <div className="text-center bg-pink-200 py-4">
         <h1 className="text-center text-4xl font-bold text-pink-500 underline italic">
           Lost Found Student Menu
@@ -24,12 +24,51 @@ const StudentMenu = () => {
               <div className="relative">
                 <button
                   onClick={() => toggleDropdown("items1")}
+                  style={{cursor:"pointer"}}
+                  className="flex items-center px-3 py-2 text-black font-bold hover:bg-yellow-500 rounded"
+                >
+                  Personal
+                  <ChevronDown className="w-4 h-4 ml-1" />
+                </button>
+                {openDropdown === "items1" && (
+                  <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded shadow-lg z-50 border border-gray-200">
+                    <div className="py-2">
+                      <div className="px-4 py-2 bg-gray-100 border-b border-gray-200">
+                        <span className="font-bold text-gray-800">Items</span>
+                      </div>
+                      <a
+                        href="/Profile"
+                        
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      >
+                        Personal Details
+                      </a>
+                      <a
+                        href="/LostReport"
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      >
+                        Lost Item List
+                      </a>
+                      <a
+                        href="/FoundReport"
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      >
+                        Found Item List
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="relative">
+                <button
+                  onClick={() => toggleDropdown("items2")}
+                  style={{cursor:"pointer"}}
                   className="flex items-center px-3 py-2 text-black font-bold hover:bg-yellow-500 rounded"
                 >
                   Items
                   <ChevronDown className="w-4 h-4 ml-1" />
                 </button>
-                {openDropdown === "items1" && (
+                {openDropdown === "items2" && (
                   <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded shadow-lg z-50 border border-gray-200">
                     <div className="py-2">
                       <div className="px-4 py-2 bg-gray-100 border-b border-gray-200">
@@ -42,7 +81,7 @@ const StudentMenu = () => {
                         Lost Item Registration
                       </a>
                       <a
-                        href=""
+                        href="/LostReport"
                         className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                       >
                         Found Item Submission
@@ -51,39 +90,10 @@ const StudentMenu = () => {
                   </div>
                 )}
               </div>
-              <div className="relative">
-                <button
-                  onClick={() => toggleDropdown("items2")}
-                  className="flex items-center px-3 py-2 text-black font-bold hover:bg-yellow-500 rounded"
-                >
-                  Reports
-                  <ChevronDown className="w-4 h-4 ml-1" />
-                </button>
-                {openDropdown === "items2" && (
-                  <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded shadow-lg z-50 border border-gray-200">
-                    <div className="py-2">
-                      <div className="px-4 py-2 bg-gray-100 border-b border-gray-200">
-                        <span className="font-bold text-gray-800">Items</span>
-                      </div>
-                      <a
-                        href="/LostReport"
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                      >
-                        Lost Item Report
-                      </a>
-                      <a
-                        href=""
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                      >
-                        Lost Item Track
-                      </a>
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
 
             {/* ------------------------ */}
+            
             <a
               href="/"
               className="px-3 py-2 text-black font-bold bg-red-500 hover:bg-red-600 rounded"

@@ -9,7 +9,7 @@ const AdminMenu = () => {
   };
 
   return (
-    <div className=" mx-auto px-4">
+    <div className=" mx-auto">
       <div className="text-center bg-green-200 py-4">
         <h1 className="text-center text-4xl font-bold text-green-500 underline italic">
           Lost Found Admin Menu
@@ -23,6 +23,7 @@ const AdminMenu = () => {
             <div className="relative">
               <button
                 onClick={() => toggleDropdown("items1")}
+                style={{cursor:"pointer"}}
                 className="flex items-center px-3 py-2 text-black font-bold hover:bg-yellow-500 rounded"
               >
                 Items
@@ -41,13 +42,7 @@ const AdminMenu = () => {
                       Lost Item Registration
                     </a>
                     <a
-                      href="/Found-Submit/:id"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                    >
-                      Found Item Submission
-                    </a>
-                    <a
-                      href=""
+                      href="/LostReport"
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                     >
                       Lost Item Track
@@ -56,7 +51,7 @@ const AdminMenu = () => {
                 </div>
               )}
             </div>
-            <div className="relative">
+            {/* <div className="relative">
               <button
                 onClick={() => toggleDropdown("student")}
                 className="flex items-center px-3 py-2 text-black font-bold hover:bg-yellow-500 rounded"
@@ -71,7 +66,7 @@ const AdminMenu = () => {
                       <span className="font-bold text-gray-800">Student</span>
                     </div>
                     <a
-                      href=""
+                      href="/Students"
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                     >
                       Student List
@@ -85,9 +80,9 @@ const AdminMenu = () => {
                   </div>
                 </div>
               )}
-            </div>
+            </div> */}
 
-            <div className="relative">
+            {/* <div className="relative">
               <button
                 onClick={() => toggleDropdown("lost-item")}
                 className="flex items-center px-3 py-2 text-black font-bold hover:bg-yellow-500 rounded"
@@ -124,9 +119,9 @@ const AdminMenu = () => {
                   </div>
                 </div>
               )}
-            </div>
+            </div> */}
 
-            <div className="relative">
+            {/* <div className="relative">
               <button
                 onClick={() => toggleDropdown("found-item")}
                 className="flex items-center px-3 py-2 text-black font-bold hover:bg-yellow-500 rounded"
@@ -157,11 +152,12 @@ const AdminMenu = () => {
                   </div>
                 </div>
               )}
-            </div>
+            </div> */}
 
             <div className="relative">
               <button
                 onClick={() => toggleDropdown("report")}
+                style={{cursor:"pointer"}}
                 className="flex items-center px-3 py-2 text-black font-bold hover:bg-yellow-500 rounded"
               >
                 Report
@@ -180,17 +176,49 @@ const AdminMenu = () => {
                       Lost Item Report
                     </a>
                     <a
-                      href=""
+                      href="/FoundReport"
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                     >
                       Found Item Report
                     </a>
-                    <a
+                    {/* <a
                       href=""
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                     >
                       Lost Found Analysis
+                    </a> */}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="relative">
+              <button
+                onClick={() => toggleDropdown("student")}
+                style={{cursor:"pointer"}}
+                className="flex items-center px-3 py-2 text-black font-bold hover:bg-yellow-500 rounded"
+              >
+                Users
+                <ChevronDown className="w-4 h-4 ml-1" />
+              </button>
+              {openDropdown === "student" && (
+                <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded shadow-lg z-50 border border-gray-200">
+                  <div className="py-2">
+                    <div className="px-4 py-2 bg-gray-100 border-b border-gray-200">
+                      <span className="font-bold text-gray-800">Student</span>
+                    </div>
+                    <a
+                      href="/Students"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      View Students
                     </a>
+                    {/* <a
+                      href=""
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      Remove Student
+                    </a> */}
                   </div>
                 </div>
               )}

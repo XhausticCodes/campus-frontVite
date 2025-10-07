@@ -30,7 +30,7 @@ export const itemIdGenerator = () => {
   return axios.get(ITEMID_URL);
 };
 
-export const notFoundItemList = () => {
+export const lostItemList = () => {
   return axios.get(LOST_URL);
 };
 

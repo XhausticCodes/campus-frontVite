@@ -1,17 +1,29 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaBoxOpen } from "react-icons/fa6";
+import { FaBoxOpen, FaArrowLeftLong } from "react-icons/fa6";
 import {
   lostItemSubmission,
   itemIdGenerator,
 } from "../../Services/ItemService";
 import { getUserDetails } from "../../Services/LoginService";
+import axios from "axios";
+import { FaCloudUploadAlt } from "react-icons/fa";
+
+const DEFAULT_IMAGE_URL =
+  "https://res.cloudinary.com/dyowvqcsn/image/upload/v1759833173/Gemini_Generated_Image_vu4wr4vu4wr4vu4w_niixw0.png";
 
 const LostItemSubmit = () => {
   let navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newId, setNewId] = useState("");
+
+  // --------------
+  const [imageFile, setImageFile] = useState(null);
+  const[imageUrl, setImageUrl] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  // --------------
+
   const [campusUser, setCampusUser] = useState({
     username: "",
     password: "",
@@ -31,6 +43,7 @@ const LostItemSubmit = () => {
     location: "",
     lostDate: new Date(),
     entryDate: new Date(),
+    imageUrl: "",
   });
 
   let [ldate, setLdate] = useState(new Date());
@@ -69,33 +82,76 @@ const LostItemSubmit = () => {
     }
   };
 
-  // const handleDescriptionChange = (event) => {
-  //   const { name, value } = event.target;
-  //   setItem((prev) => ({
-  //     ...prev,
-  //     description: {
-  //       ...prev.description,
-  //       [name]: value,
-  //     },
-  //   }));
-  // };
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith("image/")) {
+      setImageFile(file);
+    } else {
+      setImageFile(null);
+    }
+  };
 
-  const foundItemFormSubmit = () => {
+  const removeImage = () => {
+    setImageFile(null);
+    // Clear the input field
+    const input = document.getElementById("image-upload-input");
+    if (input) {
+      input.value = "";
+    }
+  };
+
+  const uploadImgToCloudinary = async () => {
+    if (!imageFile) return null;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("file", imageFile);
+
+    formData.append("upload_preset", "LostFoundApp");
+
+    try {
+      const response = await axios.post(
+        "https://api.cloudinary.com/v1_1/dyowvqcsn/image/upload",
+        formData
+      );
+      setIsUploading(false);
+      return response.data.secure_url;
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      setIsUploading(false);
+      setErrors((prev) => ({
+        ...prev,
+        image: "Image Upload Failed. Please try again.",
+      }));
+      return null;
+    }
+  };
+
+  const foundItemFormSubmit = async () => {
+    let finalImageUrl = DEFAULT_IMAGE_URL;
+
+    if (imageFile) {
+      const uploadedUrl = await uploadImgToCloudinary();
+      if (uploadedUrl) {
+        finalImageUrl = uploadedUrl;
+      } else {
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
     const finalItem = {
       ...item,
       itemId: newId,
-      // Keep description only if present to avoid spreading undefined
-      description: item.description
-        ? { ...item.description, itemId: newId }
-        : undefined,
       username: campusUser.username,
       userEmail: campusUser.email,
       lostDate: ldate,
       entryDate: edate,
+      imageUrl: finalImageUrl,
     };
 
     return lostItemSubmission(finalItem).then(() => {
-      alert("Found Item Submitted Successfully!");
+      alert("Lost Item Submitted Successfully!");
       navigate("/StudentMenu");
     });
   };
@@ -141,7 +197,15 @@ const LostItemSubmit = () => {
     }
 
     setIsSubmitting(true);
-    foundItemFormSubmit().finally(() => setIsSubmitting(false));
+    foundItemFormSubmit().finally(() => {
+      setIsSubmitting(false);
+      setIsUploading(false);
+    });
+  };
+
+  const navBack = () => {
+    if (campusUser.role === "Admin") navigate("/AdminMenu");
+    else navigate("/StudentMenu");
   };
 
   // Common input field styling
@@ -151,11 +215,23 @@ const LostItemSubmit = () => {
   const errorStyles = "text-red-500 text-xs mt-1";
 
   return (
-    <div className="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-      <div className="w-full bg-white rounded-xl shadow-lg p-8 space-y-6">
+    <div className="bg-gray-100 min-h-screen flex items-center justify-center p-2">
+      <div className="w-full bg-white rounded-xl shadow-lg p-6 space-y-6">
+        <div className="flex flex-row justify-start">
+          <button
+            className="bg-pink-400 px-3 py-2 rounded flex flex-row items-center justify-center gap-2 hover:bg-pink-500 transition-all duration-300 group "
+            style={{ cursor: "pointer" }}
+            onClick={navBack}
+          >
+            <FaArrowLeftLong className="h-5 w-5 group-hover:scale-80 group-hover:translate-x-1 transition-all duration-300" />
+            <span className="group-hover:translate-x-1 transition-all duration-300">
+              Back
+            </span>
+          </button>
+        </div>
         <div className="flex flex-col items-center">
-          <div className="flex items-center justify-center w-16 h-16 mb-4 bg-indigo-100 rounded-full">
-            <FaBoxOpen size={35} className="text-indigo-600" />
+          <div className="flex items-center justify-center w-16 h-16 mb-4 bg-pink-100 rounded-full">
+            <FaBoxOpen size={35} className="text-pink-600" />
           </div>
           <h2 className="text-3xl font-bold text-gray-800 text-center">
             Lost Item Submission
@@ -166,8 +242,8 @@ const LostItemSubmit = () => {
         <form onSubmit={handleValidation} className="">
           {/* User & Date Information */}
           <div className="grid grid-cols-2 gap-6">
-            <div className="grid grid-rows-1 md:grid-rows-2 gap-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-cols items-start justify-center space-x-8 border-gray-200 border-b pb-6">
                 <div>
                   <label className={labelStyles}>Generated Item ID</label>
                   <input
@@ -194,55 +270,121 @@ const LostItemSubmit = () => {
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="lostDate" className={labelStyles}>
-                    Select Lost Date
-                  </label>
-                  <input
-                    id="lostDate"
-                    type="date"
-                    className={inputStyles}
-                    value={ldate}
-                    onChange={(event) => {
-                      if (errors.lostDate) {
-                        setErrors((prev) => ({ ...prev, lostDate: undefined }));
-                      }
-                      setLdate(event.target.value);
-                    }}
-                  />
-                  {errors.lostDate && (
-                    <p className={errorStyles}>{errors.lostDate}</p>
-                  )}
+                <div className="grid grid-cols-1 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="md:col-span-2">
+                      <label htmlFor="lostDate" className={labelStyles}>
+                        Select Lost Date
+                      </label>
+                      <input
+                        id="lostDate"
+                        type="date"
+                        className={inputStyles}
+                        value={ldate}
+                        onChange={(event) => {
+                          if (errors.lostDate) {
+                            setErrors((prev) => ({
+                              ...prev,
+                              lostDate: undefined,
+                            }));
+                          }
+                          setLdate(event.target.value);
+                        }}
+                      />
+                      {errors.lostDate && (
+                        <p className={errorStyles}>{errors.lostDate}</p>
+                      )}
+                    </div>
+                    <div className="md:col-span-2">
+                      <label htmlFor="entryDate" className={labelStyles}>
+                        Select Entry Date
+                      </label>
+                      <input
+                        id="entryDate"
+                        type="date"
+                        className={inputStyles}
+                        value={edate}
+                        onChange={(event) => {
+                          if (errors.entryDate) {
+                            setErrors((prev) => ({
+                              ...prev,
+                              entryDate: undefined,
+                            }));
+                          }
+                          setEdate(event.target.value);
+                        }}
+                      />
+                      {errors.entryDate && (
+                        <p className={errorStyles}>{errors.entryDate}</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label htmlFor="entryDate" className={labelStyles}>
-                    Select Entry Date
+                <div className="border-gray-200 pl-6 border-l ">
+                  <label htmlFor="imageUpload" className={labelStyles}>
+                    Upload Item Image *
                   </label>
-                  <input
-                    id="entryDate"
-                    type="date"
-                    className={inputStyles}
-                    value={edate}
-                    onChange={(event) => {
-                      if (errors.entryDate) {
-                        setErrors((prev) => ({
-                          ...prev,
-                          entryDate: undefined,
-                        }));
-                      }
-                      setEdate(event.target.value);
-                    }}
-                  />
-                  {errors.entryDate && (
-                    <p className={errorStyles}>{errors.entryDate}</p>
+                  <div className="mt-2 flex items-center justify-center w-full">
+                    <div className="relative w-full h-48">
+                      <label
+                        htmlFor="image-upload-input"
+                        className="flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                      >
+                        {imageFile ? (
+                          <div className="relative w-full h-full">
+                            <img
+                              src={URL.createObjectURL(imageFile)}
+                              alt="Preview"
+                              className="h-full w-full object-contain rounded-lg p-2"
+                            />
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                removeImage();
+                              }}
+                              style={{ cursor: "pointer" }}
+                              className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded px-2 py-1 flex items-center justify-center text-sm font-bold transition-colors duration-200"
+                              title="Remove image"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <FaCloudUploadAlt className="w-10 h-10 mb-3 text-gray-400" />
+                            <p className="mb-2 text-sm text-gray-500">
+                              <span className="font-semibold">
+                                Click to upload
+                              </span>{" "}
+                              or drag and drop
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              PNG, JPG, or JPEG
+                            </p>
+                          </div>
+                        )}
+                        <input
+                          id="image-upload-input"
+                          type="file"
+                          className="hidden"
+                          accept="image/png, image/jpeg, image/jpg"
+                          onChange={handleImageChange}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                  {errors.image && (
+                    <p className={errorStyles}>{errors.image}</p>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Item Description Section */}
+            {/* Main Form Section */}
             <div className="border-gray-200 border-l pl-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                   <label htmlFor="itemName" className={labelStyles}>
                     Item Name *
@@ -273,7 +415,7 @@ const LostItemSubmit = () => {
                     <p className={errorStyles}>{errors.category}</p>
                   )}
                 </div>
-                
+
                 <div>
                   <label htmlFor="color" className={labelStyles}>
                     Color
@@ -306,7 +448,7 @@ const LostItemSubmit = () => {
                 </div>
                 <div className="md:col-span-2">
                   <label htmlFor="location" className={labelStyles}>
-                    Location of Lost
+                    Location
                   </label>
                   <input
                     id="location"
@@ -323,13 +465,54 @@ const LostItemSubmit = () => {
             </div>
           </div>
 
+          {/* <div className="mt-6 border-t border-gray-200 pt-6">
+            <label htmlFor="imageUpload" className={labelStyles}>
+              Upload Item Image *
+            </label>
+            <div className="mt-2 flex items-center justify-center w-full">
+              <label
+                htmlFor="image-upload-input"
+                className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+              >
+                {imageFile ? (
+                  <img
+                    src={URL.createObjectURL(imageFile)}
+                    alt="Preview"
+                    className="h-full w-full object-contain rounded-lg p-2"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <FaCloudUploadAlt className="w-10 h-10 mb-3 text-gray-400" />
+                    <p className="mb-2 text-sm text-gray-500">
+                      <span className="font-semibold">Click to upload</span> or
+                      drag and drop
+                    </p>
+                    <p className="text-xs text-gray-500">PNG, JPG, or JPEG</p>
+                  </div>
+                )}
+                <input
+                  id="image-upload-input"
+                  type="file"
+                  className="hidden"
+                  accept="image/png, image/jpeg, image/jpg"
+                  onChange={handleImageChange}
+                />
+              </label>
+            </div>
+            {errors.image && <p className={errorStyles}>{errors.image}</p>}
+          </div> */}
+
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isUploading} // Disable button during upload or submission
             style={{ cursor: "pointer" }}
-            className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out mt-6"
+            className="w-full bg-pink-500 text-white font-bold py-3 px-4 rounded-md hover:bg-pink-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out mt-6"
           >
-            {isSubmitting ? "Submitting..." : "Submit Found Item"}
+            {isUploading
+              ? "Uploading Image..."
+              : isSubmitting
+              ? "Submitting..."
+              : "Submit Lost Item"}
           </button>
         </form>
       </div>

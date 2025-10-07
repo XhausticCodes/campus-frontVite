@@ -9,6 +9,8 @@ import "./App.css";
 import LostItemReport from "./Components/ItemComponent/LostItemReport";
 import FoundItemSubmission from "./Components/ItemComponent/FoundItemSubmission";
 import FoundItemReport from "./Components/ItemComponent/FoundItemReport";
+import StudentList from "./Components/LoginComponent/StudentList";
+import StudentListGoodUI from "./Components/LoginComponent/StudentListGoodUI";
 
 function App() {
   return (
@@ -30,6 +32,9 @@ function App() {
           <Route path="/LostReport" element={<LostItemReport />} />
           <Route path="/Found-Submit/:id" element={<FoundItemSubmission />} />
           <Route path="/FoundReport" element={<FoundItemReport />} />
+          <Route path="/Students" element={<StudentList />} />
+          {/* <Route path="/Students" element={<StudentListGoodUI />} /> */}
+          <Route path="/Profile" element={<SingleStudentDetails />} />
         </Routes>
       </BrowserRouter>
     </div>

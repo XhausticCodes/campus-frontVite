@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getItemById, foundItemSubmission } from "../../Services/ItemService";
 import { FaCheckCircle } from "react-icons/fa";
+import { FaArrowLeftLong } from "react-icons/fa6";
 
 const FoundItemSubmission = () => {
   const { id } = useParams(); // Get item ID from the URL
@@ -62,6 +63,10 @@ const FoundItemSubmission = () => {
   if (error) {
      return <div className="text-center text-red-500 text-lg mt-10">{error}</div>;
   }
+
+  const returnBack = () => {
+    navigate(-1);
+  };
   
   // Common input field styling
   const inputStyles = "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed";
@@ -69,7 +74,15 @@ const FoundItemSubmission = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-8 space-y-6">
+      <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-5 space-y-6">
+      <div className="flex flex-row justify-start">
+        <button className="bg-indigo-500 text-white px-3 py-2 rounded flex flex-row items-center justify-center gap-2 hover:bg-indigo-700 transition-all duration-300 group " style={{cursor:"pointer"}} onClick={returnBack} >
+        <FaArrowLeftLong className="h-5 w-5 group-hover:scale-80 group-hover:translate-x-1 transition-all duration-300" />
+        <span className="group-hover:translate-x-1 transition-all duration-300">
+          Back
+        </span>
+          </button>
+        </div>
         <div className="flex flex-col items-center">
           <FaCheckCircle size={40} className="text-green-500 mb-4" />
           <h2 className="text-3xl font-bold text-gray-800 text-center">Found Item Submission</h2>
