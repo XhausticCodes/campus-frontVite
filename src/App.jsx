@@ -11,6 +11,7 @@ import FoundItemSubmission from "./Components/ItemComponent/FoundItemSubmission"
 import FoundItemReport from "./Components/ItemComponent/FoundItemReport";
 import StudentList from "./Components/LoginComponent/StudentList";
 import StudentListGoodUI from "./Components/LoginComponent/StudentListGoodUI";
+import StudentMenuGoodUI from "./Components/LoginComponent/StudentMenuGoodUI";
 
 function App() {
   return (
@@ -21,9 +22,8 @@ function App() {
           <Route path="/" element={<LoginPage />} />
           <Route path="/Register" element={<SigninPage />} />
           <Route path="/AdminMenu" element={<AdminMenu />} />
-          {/* <Route path="/StudentMenu" element={<StudentMenuNewGoodUI />} /> */}
-          {/* <Route path="/StudentMenu" element={<StudentMenuu />} /> */}
-          <Route path="/StudentMenu" element={<StudentMenu />} />
+          <Route path="/StudentMenu" element={<StudentMenuGoodUI />} />
+          {/* <Route path="/StudentMenu" element={<StudentMenu />} /> */}
           <Route
             path="/SingleStudentDetail"
             element={<SingleStudentDetails />}

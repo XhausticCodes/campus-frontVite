@@ -14,6 +14,7 @@ import {
   MapPin,
   Clock,
   CheckCircle,
+  BookUser,
 } from "lucide-react";
 
 const StudentMenuGoodUI = () => {
@@ -30,46 +31,24 @@ const StudentMenuGoodUI = () => {
 
   const menuItems = [
     {
+      title: "Personal",
+      icon: BookUser ,
+      items: [
+        { name: "Profile", href: "/Profile", icon: CheckCircle },
+        { name: "Lost Item List", href: "/LostReport", icon: FileText },
+        { name: "Found Item List", href: "/FoundReport", icon: FileText },
+      ],
+    },
+    {
       title: "Items",
       icon: Package,
       items: [
-        { name: "Lost Item Registration", href: "", icon: MapPin },
-        { name: "Found Item Submission", href: "", icon: CheckCircle },
-        { name: "Lost Item Track", href: "", icon: Search },
-      ],
-    },
-    {
-      title: "Student",
-      icon: User,
-      items: [
-        { name: "Student List", href: "", icon: User },
-        { name: "Remove Student", href: "", icon: User },
-      ],
-    },
-    {
-      title: "Lost-Item",
-      icon: Search,
-      items: [
-        { name: "Lost Item Registration", href: "", icon: MapPin },
-        { name: "Lost Item List", href: "", icon: FileText },
-        { name: "Lost Item Track", href: "", icon: Search },
-      ],
-    },
-    {
-      title: "Found-Item",
-      icon: Package,
-      items: [
-        { name: "Found Item Submission", href: "", icon: CheckCircle },
-        { name: "Found Item List", href: "", icon: FileText },
-      ],
-    },
-    {
-      title: "Report",
-      icon: FileText,
-      items: [
-        { name: "Found Item Report", href: "", icon: FileText },
-        { name: "Lost Item Report", href: "", icon: FileText },
-        { name: "Lost Found Analysis", href: "", icon: FileText },
+        { name: "Lost Item Registration", href: "/LostSubmit", icon: MapPin },
+        {
+          name: "Found Item Submission",
+          href: "/LostReport",
+          icon: CheckCircle,
+        },
       ],
     },
   ];
@@ -109,7 +88,7 @@ const StudentMenuGoodUI = () => {
                     {/* Dropdown Menu */}
                     {openDropdown === menuItem.title && (
                       <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded-lg shadow-lg z-50 border border-gray-200 py-2">
-                        <div className="px-4 py-2 bg-gray-50 border-b border-gray-100">
+                        <div className="px-4 py-2 bg-gray-50 boxrder-b border-gray-100">
                           <span className="text-sm font-semibold text-gray-800">
                             {menuItem.title}
                           </span>
@@ -216,155 +195,7 @@ const StudentMenuGoodUI = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {/* Welcome Section */}
-        <div className="px-4 py-6 sm:px-0">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <Home className="h-8 w-8 text-indigo-600" />
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Welcome to Student Portal
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">
-                      Lost & Found Management System
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 px-4 sm:px-0">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <Search className="h-6 w-6 text-red-500" />
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Lost Items
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">12</dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <CheckCircle className="h-6 w-6 text-green-500" />
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Found Items
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">8</dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <Clock className="h-6 w-6 text-yellow-500" />
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Pending
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">4</dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <FileText className="h-6 w-6 text-blue-500" />
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Reports
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">3</dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="mt-8 px-4 sm:px-0">
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
-            <div className="px-4 py-5 sm:px-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">
-                Recent Activity
-              </h3>
-              <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                Your latest lost and found activities
-              </p>
-            </div>
-            <ul className="divide-y divide-gray-200">
-              <li className="px-4 py-4 sm:px-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Search className="h-5 w-5 text-red-500 mr-3" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        Lost Item Reported
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        iPhone 13 Pro - 2 hours ago
-                      </p>
-                    </div>
-                  </div>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                    Lost
-                  </span>
-                </div>
-              </li>
-              <li className="px-4 py-4 sm:px-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        Found Item Submitted
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Black Backpack - 1 day ago
-                      </p>
-                    </div>
-                  </div>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Found
-                  </span>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
+        <div className="text-3xl text-center">Student Menu</div>
       </div>
     </div>
   );
