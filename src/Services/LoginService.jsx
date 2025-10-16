@@ -1,22 +1,15 @@
 import axios from "axios";
 
-const LOGIN_URL = "http://localhost:9999/lost-found/login";
-const STUD_URL = "http://localhost:9999/lost-found/student";
+const BASE_URL = "http://localhost:9999/lost-found/login";
 
-export const registerNewUser = (user) => {
-  return axios.post(LOGIN_URL, user);
-};
-export const validateUser = (userId, password) => {
-  return axios.get(LOGIN_URL + "/" + userId + "/" + password);
-};
-export const getUserDetails = () => {
-  return axios.get(LOGIN_URL);
-};
+export const registerNewUser = (user) => axios.post(BASE_URL, user);
 
-export const getAllStudent = () => {
-  return axios.get(STUD_URL);
-};
+export const validateUser = (userId, password) =>
+  axios.get(`${BASE_URL}/${userId}/${password}`);
 
-export const deleteStudent = (username) =>{
-  return axios.delete(STUD_URL + "/" + username);
-};
+export const getUserDetails = () => axios.get(BASE_URL);
+
+export const getAllStudents = () => axios.get(`${BASE_URL}/students`);
+
+export const deleteStudentByUsername = (username) =>
+  axios.delete(`${BASE_URL}/student/${username}`);

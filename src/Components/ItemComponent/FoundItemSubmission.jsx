@@ -1,146 +1,198 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { getItemById, foundItemSubmission } from "../../Services/ItemService";
-import { FaCheckCircle } from "react-icons/fa";
-import { FaArrowLeftLong } from "react-icons/fa6";
+import React, { useState, useEffect, useRef, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { foundItemSubmission } from "../../Services/ItemService";
+import { getUserDetails } from "../../Services/LoginService";
+import axios from "axios";
+import { ArrowLeft, CloudUpload, X } from "lucide-react";
+import { ThemeContext } from "../../Context/ThemeContext";
 
 const FoundItemSubmission = () => {
-  const { id } = useParams(); // Get item ID from the URL
-  const navigate = useNavigate();
-  const [item, setItem] = useState(null);
-  const [foundDate, setFoundDate] = useState(new Date().toISOString().slice(0, 10)); // Default to today
-  const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+    const navigate = useNavigate();
+    const [errors, setErrors] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [imageFile, setImageFile] = useState(null);
+    const [previewImage, setPreviewImage] = useState(null);
+    const today = new Date().toISOString().slice(0, 10);
+    const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    // Fetch the details of the specific item using the ID from the URL
-    if (id) {
-      getItemById(id)
-        .then((response) => {
-          setItem(response.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching item details:", error);
-          setError("Could not load item details.");
+    const [item, setItem] = useState({
+        username: "",
+        userEmail: "",
+        itemName: "",
+        category: "",
+        color: "",
+        brand: "",
+        location: "",
+        imageUrl: "",
+        foundDate: today,
+        status: false,
+    });
+
+    useEffect(() => {
+        getUserDetails().then((response) => {
+            const { username, email } = response.data;
+            setItem((prev) => ({ ...prev, username, userEmail: email }));
         });
-    }
-  }, [id]);
+    }, []);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    if (!foundDate) {
-      setError("Please select a valid found date.");
-      return;
-    }
-    
-    setIsSubmitting(true);
-    
-    // Create the updated item object with the new foundDate
-    const updatedItem = {
-      ...item,
-      foundDate: foundDate,
+    const onChangeHandler = (e) => {
+        const { name, value } = e.target;
+        setItem((prev) => ({ ...prev, [name]: value }));
+        if (errors[name]) setErrors((prev) => ({ ...prev, [name]: undefined }));
     };
 
-    foundItemSubmission(updatedItem)
-      .then(() => {
-        alert("Item successfully marked as found!");
-        // Navigate back to the student/admin menu or the report page
-        navigate("/StudentMenu"); // Or navigate(-1) to go back to the previous page
-      })
-      .catch((error) => {
-        console.error("Failed to submit found item:", error);
-        setError("An error occurred during submission. Please try again.");
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
-  };
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith("image/")) {
+            setImageFile(file);
+            setPreviewImage(URL.createObjectURL(file));
+        }
+    };
 
-  if (!item && !error) {
-    return <div className="text-center text-lg mt-10">Loading item data...</div>;
-  }
-  
-  if (error) {
-     return <div className="text-center text-red-500 text-lg mt-10">{error}</div>;
-  }
+    const removeImage = () => {
+        setImageFile(null);
+        setPreviewImage(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
 
-  const returnBack = () => {
-    navigate(-1);
-  };
-  
-  // Common input field styling
-  const inputStyles = "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed";
-  const labelStyles = "block text-sm font-medium text-gray-700 mb-1";
+    const uploadImgToCloudinary = async () => {
+        if (!imageFile) return null;
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append("file", imageFile);
+        formData.append("upload_preset", "LostFoundApp");
+        try {
+            const res = await axios.post("https://api.cloudinary.com/v1_1/dyowvqcsn/image/upload", formData);
+            return res.data.secure_url;
+        } catch (error) {
+            setErrors((prev) => ({ ...prev, image: "Image Upload Failed." }));
+            return null;
+        } finally {
+            setIsUploading(false);
+        }
+    };
 
-  return (
-    <div className="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-5 space-y-6">
-      <div className="flex flex-row justify-start">
-        <button className="bg-indigo-500 text-white px-3 py-2 rounded flex flex-row items-center justify-center gap-2 hover:bg-indigo-700 transition-all duration-300 group " style={{cursor:"pointer"}} onClick={returnBack} >
-        <FaArrowLeftLong className="h-5 w-5 group-hover:scale-80 group-hover:translate-x-1 transition-all duration-300" />
-        <span className="group-hover:translate-x-1 transition-all duration-300">
-          Back
-        </span>
-          </button>
+    const validateForm = () => {
+        let tempErrors = {};
+        ["itemName", "category", "location"].forEach((field) => {
+            if (!item[field]?.trim()) tempErrors[field] = "This field is required";
+        });
+        setErrors(tempErrors);
+        return Object.keys(tempErrors).length === 0;
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!validateForm()) return;
+        setIsSubmitting(true);
+        let imageUrl = item.imageUrl;
+        if (imageFile) {
+            const uploadedUrl = await uploadImgToCloudinary();
+            if (uploadedUrl) {
+                imageUrl = uploadedUrl;
+            } else {
+                setIsSubmitting(false);
+                return;
+            }
+        }
+        foundItemSubmission({ ...item, imageUrl })
+            .then(() => {
+                alert("Found Item Submitted Successfully!");
+                navigate(-1);
+            })
+            .catch(() => alert("Submission failed. Please try again."))
+            .finally(() => setIsSubmitting(false));
+    };
+
+    const { theme } = useContext(ThemeContext);
+    const inputStyles = "w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
+    const labelStyles = theme === 'light' ? "block text-sm font-semibold text-gray-700 mb-1" : "block text-sm font-semibold text-gray-200 mb-1";
+    const errorStyles = "text-red-500 text-xs mt-1";
+
+    return (
+        <div className={` flex flex-col items-center justify-center p-4 ${theme === 'light' ? 'bg-gray-50' : 'bg-gray-900 text-white'}`}>
+            <div className="w-full max-w-6xl">
+                <div className="mb-4">
+                    <button onClick={() => navigate(-1)} className={`flex items-center gap-2 text-sm font-semibold transition-colors ${theme === 'light' ? 'text-gray-600 hover:text-gray-800' : 'text-gray-200 hover:text-gray-300'}`}>
+                        <ArrowLeft size={18} /> Return
+                    </button>
+                </div>
+                <form onSubmit={handleSubmit} className={`shadow-xl rounded-2xl overflow-hidden ${theme === 'light' ? 'bg-white' : 'bg-gray-800'}`}>
+                    <div className="grid grid-cols-1 lg:grid-cols-5">
+                        {/* Left Pane: Image Uploader */}
+                        <div className={`lg:col-span-2 p-8 flex flex-col justify-center ${theme === 'light' ? 'bg-gray-100' : 'bg-gray-700'}`}>
+                            <label className={labelStyles}>Item Image (Optional)</label>
+                            <div className="mt-2 w-full h-64">
+                                {previewImage ? (
+                                    
+                                    <div className="relative w-full h-full">
+                                        <img src={previewImage} alt="Preview" className={`h-full w-full object-contain rounded-lg p-2 border-2 border-gray-300 ${theme === 'light' ? 'bg-white' : 'bg-gray-700'}`} />
+                                        <button type="button" onClick={removeImage} className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600">
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    
+                                    <label htmlFor="image-upload-input" className={`flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer ${theme === 'light' ? 'bg-white hover:bg-gray-50' : 'bg-gray-700 hover:bg-gray-600'}`}>
+                                        <div className="flex flex-col items-center justify-center pt-5 pb-6 text-gray-500">
+                                            <CloudUpload className="w-10 h-10 mb-3" />
+                                            <p className="text-sm font-semibold">Click to upload image</p>
+                                            <p className="text-xs">PNG or JPG</p>
+                                        </div>
+                                        <input ref={fileInputRef} id="image-upload-input" type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+                                    </label>
+                                )}
+                            </div>
+                            {errors.image && <p className={errorStyles}>{errors.image}</p>}
+                        </div>
+
+                        {/* Right Pane: Form Fields */}
+                        <div className="lg:col-span-3 p-8">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-1">Report a Found Item</h2>
+                            <p className="text-sm text-gray-500 mb-6">Fill in the details of the item you found.</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="md:col-span-2">
+                                    <label className={labelStyles}>Item Name *</label>
+                                    <input name="itemName" className={inputStyles} value={item.itemName} onChange={onChangeHandler} />
+                                    {errors.itemName && <p className={errorStyles}>{errors.itemName}</p>}
+                                </div>
+                                <div>
+                                    <label className={labelStyles}>Category *</label>
+                                    <input name="category" className={inputStyles} value={item.category} onChange={onChangeHandler} />
+                                    {errors.category && <p className={errorStyles}>{errors.category}</p>}
+                                </div>
+                                <div>
+                                    <label className={labelStyles}>Found Date</label>
+                                    <input type="date" name="foundDate" className={inputStyles} value={item.foundDate} onChange={onChangeHandler} />
+                                </div>
+                                <div>
+                                    <label className={labelStyles}>Brand</label>
+                                    <input name="brand" className={inputStyles} value={item.brand} onChange={onChangeHandler} />
+                                </div>
+                                <div>
+                                    <label className={labelStyles}>Color</label>
+                                    <input name="color" className={inputStyles} value={item.color} onChange={onChangeHandler} />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className={labelStyles}>Location Found *</label>
+                                    <input name="location" className={inputStyles} value={item.location} onChange={onChangeHandler} />
+                                    {errors.location && <p className={errorStyles}>{errors.location}</p>}
+                                </div>
+                            </div>
+                            <div className="pt-8 flex justify-end">
+                                <button type="submit" disabled={isSubmitting || isUploading} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 disabled:opacity-60 transition-colors">
+                                    {isUploading ? "Uploading..." : isSubmitting ? "Submitting..." : "Submit Item"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div className="flex flex-col items-center">
-          <FaCheckCircle size={40} className="text-green-500 mb-4" />
-          <h2 className="text-3xl font-bold text-gray-800 text-center">Found Item Submission</h2>
-          <p className="text-gray-500 mt-2">Confirm the details and add the date the item was found.</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className={labelStyles}>Item ID</label>
-              <input type="text" value={item.itemId} className={inputStyles} readOnly />
-            </div>
-            <div>
-              <label className={labelStyles}>Item Name</label>
-              <input type="text" value={item.itemName} className={inputStyles} readOnly />
-            </div>
-            <div>
-              <label className={labelStyles}>Category</label>
-              <input type="text" value={item.category} className={inputStyles} readOnly />
-            </div>
-             <div>
-              <label className={labelStyles}>Brand</label>
-              <input type="text" value={item.brand} className={inputStyles} readOnly />
-            </div>
-            <div>
-              <label className={labelStyles}>Color</label>
-              <input type="text" value={item.color} className={inputStyles} readOnly />
-            </div>
-            <div>
-              <label className={labelStyles}>Location Lost</label>
-              <input type="text" value={item.location} className={inputStyles} readOnly />
-            </div>
-            <div className="md:col-span-2">
-                <label htmlFor="foundDate" className={labelStyles}>Select Found Date *</label>
-                <input
-                  id="foundDate"
-                  type="date"
-                  value={foundDate}
-                  onChange={(e) => setFoundDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  required
-                />
-            </div>
-          </div>
-          
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out mt-6"
-          >
-            {isSubmitting ? "Submitting..." : "Submit Found Item"}
-          </button>
-          
-           {error && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}
-        </form>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default FoundItemSubmission;

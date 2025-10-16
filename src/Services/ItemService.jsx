@@ -1,47 +1,18 @@
 import axios from "axios";
-const ITEM_URL = "http://localhost:9999/lost-found/item";
-const ITEMID_URL = "http://localhost:9999/lost-found/id-gen";
-const LOST_URL = "http://localhost:9999/lost-found/not-found";
-const FOUND_URL = "http://localhost:9999/lost-found/found";
-const LOSTBYUSER_URL = "http://localhost:9999/lost-found/lost";
-const LOSTFOUND_URL = "http://localhost:9999/lost-found/lostFound";
 
-export const getAllItems = () => {
-  return axios.get(ITEM_URL);
-};
+const BASE_URL = "http://localhost:9999/lost-found";
 
-export const lostItemSubmission = (lostItem) => {
-  return axios.post(ITEM_URL, lostItem);
-};
+export const getAllLostItems = () => axios.get(`${BASE_URL}/lost-items`);
+export const getLostItemsByUser = () => axios.get(`${BASE_URL}/lost-items/user`);
+export const getLostItemById = (id) => axios.get(`${BASE_URL}/lost-items/${id}`);
+export const lostItemSubmission = (lostItem) => axios.post(`${BASE_URL}/lost-items`, lostItem);
+export const deleteLostItemById = (id) => axios.delete(`${BASE_URL}/lost-items/${id}`);
 
-export const foundItemSubmission = (lostItem) => {
-  return axios.put(ITEM_URL, lostItem);
-};
+export const getAllFoundItems = () => axios.get(`${BASE_URL}/found-items`);
+export const getFoundItemsByUser = () => axios.get(`${BASE_URL}/found-items/user`);
+export const getFoundItemById = (id) => axios.get(`${BASE_URL}/found-items/${id}`);
+export const foundItemSubmission = (foundItem) => axios.post(`${BASE_URL}/found-items`, foundItem);
+export const deleteFoundItemById = (id) => axios.delete(`${BASE_URL}/found-items/${id}`);
 
-export const getItemById = (id) => {
-  return axios.get(ITEM_URL + "/" + id);
-};
-
-export const deleteItemById = (id) => {
-  return axios.delete(ITEM_URL + "/" + id);
-};
-
-export const itemIdGenerator = () => {
-  return axios.get(ITEMID_URL);
-};
-
-export const lostItemList = () => {
-  return axios.get(LOST_URL);
-};
-
-export const foundItemList = () => {
-  return axios.get(FOUND_URL);
-};
-
-export const lostItemListByUser = () =>{
-  return axios.get(LOSTBYUSER_URL);
-};
-
-export const foundItemListByUser = () =>{
-  return axios.get(LOSTFOUND_URL);
-};
+export const getMatchingFoundItems = (lostItemId, threshold = 0.8) =>
+  axios.get(`${BASE_URL}/fuzzy/match/${lostItemId}?threshold=${threshold}`);

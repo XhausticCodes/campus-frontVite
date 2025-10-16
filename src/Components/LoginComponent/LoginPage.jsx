@@ -1,9 +1,35 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import GridMotion from "../../../public/GridMotion.jsx";
 import SpotLightCard from "../../../public/SpotLightCard.jsx";
 import LoginForm from "./LoginForm.jsx";
+import { useAuth } from "../../Context/AuthContext";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
+  // Show loading while checking authentication
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  // Don't render login form if user is authenticated
+  if (isAuthenticated) {
+    return null;
+  }
+
   const items = [
     "Item-1",
     "https://images.unsplash.com/photo-1612023395494-1c4050b68647?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
@@ -41,9 +67,9 @@ const LoginPage = () => {
       </div>
       <div className="relative z-10">
         <LoginForm />
-        </div>
+      </div>
 
-        {/* Spotlight effect  */}
+      {/* Spotlight effect  */}
       {/* <div className="relative z-10">
         <SpotLightCard
           className="custom-spotlight-card"

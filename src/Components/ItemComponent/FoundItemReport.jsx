@@ -1,25 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  foundItemList, // For Admin
-  foundItemListByUser, // For Student
+  getAllFoundItems,
+  getFoundItemsByUser,
 } from "../../Services/ItemService";
 import { getUserDetails } from "../../Services/LoginService";
-import { FaGift, FaRegFolderOpen } from "react-icons/fa";
-import { FaArrowLeftLong } from "react-icons/fa6";
-import { useNavigate } from "react-router-dom";
+import { ArchiveRestore, ArrowLeft, X, User } from "lucide-react";
+import { ThemeContext } from "../../Context/ThemeContext";
+
+// A more compact detail item for the grid layout
+const DetailItem = ({ label, value }) => (
+  <div>
+    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{label}</p>
+    <p className="font-medium text-gray-800">{value || "N/A"}</p>
+  </div>
+);
 
 const FoundItemReport = () => {
-  const [foundItems, setFoundItems] = useState([]);
+  const navigate = useNavigate();
+  const { theme } = useContext(ThemeContext);
+  const [itemList, setItemList] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [selectedItem, setSelectedItem] = useState(null);
 
   useEffect(() => {
-    // Get the current logged-in user's details to determine their role
     getUserDetails()
-      .then((response) => {
-        setCurrentUser(response.data);
-      })
+      .then((response) => setCurrentUser(response.data))
       .catch((error) => {
         console.error("Error fetching user details:", error);
         setLoading(false);
@@ -27,157 +34,130 @@ const FoundItemReport = () => {
   }, []);
 
   useEffect(() => {
-    // After getting the user, fetch the appropriate list of found items
-    if (currentUser) {
-      if (currentUser.role === "Admin") {
-        // Admins see all found items across the application
-        foundItemList()
-          .then((response) => {
-            setFoundItems(response.data);
-          })
-          .catch((error) => {
-            console.error("Error fetching all found items:", error);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
-      } else if (currentUser.role === "Student") {
-        // Students only see items they reported that have been found
-        foundItemListByUser()
-          .then((response) => {
-            setFoundItems(response.data);
-          })
-          .catch((error) => {
-            console.error("Error fetching user's found items:", error);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
-      }
-    }
-  }, [currentUser]); // This effect depends on the currentUser state
+    if (!currentUser) return;
+    const fetchItems =
+      currentUser.role === "Admin" ? getAllFoundItems : getFoundItemsByUser;
+    fetchItems()
+      .then((response) => setItemList(response.data))
+      .catch((error) => console.error("Error fetching found items:", error))
+      .finally(() => setLoading(false));
+  }, [currentUser]);
+
+  const pageTitle =
+    currentUser?.role === "Admin" ? "Found Item Report" : "My Found Items";
+  const pageDescription =
+    currentUser?.role === "Admin"
+      ? "All reported found items"
+      : "Items you have reported as found";
 
   if (loading) {
     return (
-      <div className="text-center text-lg mt-10">Loading found items...</div>
+      <div className={`flex justify-center items-center h-screen ${theme === 'light' ? 'bg-gray-50 text-gray-600' : 'bg-gray-900 text-gray-200'} font-medium`}>
+        Loading report...
+      </div>
     );
   }
-
-  const returnBack = () => {
-    if (currentUser?.role === "Admin") {
-      navigate("/AdminMenu");
-    } else {
-      navigate("/StudentMenu");
-    }
-  };
-
   return (
-    <div className="bg-gray-100 min-h-screen p-4 md:p-8">
-      <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-6">
-        <div className="flex flex-row justify-start">
+    <div className={`p-4 sm:p-6 lg:p-8 ${theme === 'light' ? 'bg-gray-50' : 'bg-gray-900 text-white'}`}>
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-6">
           <button
-            className="bg-indigo-500 text-white px-3 py-2 rounded flex flex-row items-center justify-center gap-2 hover:bg-indigo-700 transition-all duration-300 group "
-            style={{ cursor: "pointer" }}
-            onClick={returnBack}
+            onClick={() => navigate(-1)}
+            className={`flex items-center gap-2 text-sm font-semibold transition-colors ${theme === 'light' ? 'text-gray-600 hover:text-gray-800' : 'text-gray-200 hover:text-gray-300'}`}
           >
-            <FaArrowLeftLong className="h-5 w-5 group-hover:scale-80 group-hover:translate-x-1 transition-all duration-300" />
-            <span className="group-hover:translate-x-1 transition-all duration-300">
-              Back
-            </span>
+            <ArrowLeft size={18} />
+            Return
           </button>
         </div>
-        <div className="text-center mb-8">
-          <FaGift size={40} className="text-indigo-600 mx-auto mb-3" />
-          <h1 className="text-3xl font-bold text-gray-800">
-            Found Item Report
-          </h1>
-          <p className="text-gray-500 mt-2">
-            Items that have been successfully found and reported.
-          </p>
-        </div>
-
-        {foundItems.length === 0 ? (
-          <div className="text-center py-10">
-            <FaRegFolderOpen size={50} className="mx-auto text-gray-400 mb-4" />
-            <h2 className="text-xl font-semibold text-gray-700">
-              No Found Items to Display
-            </h2>
-            <p className="text-gray-500 mt-2">
-              There are currently no items marked as found.
-            </p>
+        <div className={`shadow-xl rounded-2xl overflow-hidden ${theme === 'light' ? 'bg-white' : 'bg-gray-800'}`}>
+          <div className={`p-6 sm:p-8 border-b ${theme === 'light' ? 'border-gray-200' : 'border-gray-700'}`}>
+            <div className="flex items-center gap-4">
+              <div className="bg-green-100 p-3 rounded-full">
+                <ArchiveRestore className="h-8 w-8 text-green-600" />
+              </div>
+              <div>
+                <h2 className={`text-2xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{pageTitle}</h2>
+                <p className={`text-sm ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>{pageDescription}</p>
+              </div>
+            </div>
           </div>
-        ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className={`min-w-full divide-y ${theme === 'light' ? 'divide-gray-200' : 'divide-gray-700'}`}>
+              <thead className={theme === 'light' ? 'bg-gray-50' : 'bg-gray-800'}>
                 <tr>
-                  {[
-                    "Image",
-                    "Item ID",
-                    "Item Name",
-                    "Category",
-                    "Brand",
-                    "Location Lost",
-                    "Lost Date",
-                    "Found Date",
-                    "Reported By",
-                  ].map((header) => (
-                    <th
-                      key={header}
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
+                  {["Item Name", "Category", "Location", "Found Date", "Reported By"].map((header) => (
+                    <th key={header} className={`px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
                       {header}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {foundItems.map((item) => (
-                  <tr key={item.itemId} className="hover:bg-gray-50">
-                    <td className="px-2 py-2 whitespace-nowrap">
-                      <img
-                        src={item.imageUrl}
-                        alt={item.itemName}
-                        className="h-16 w-16 object-cover rounded-md shadow-md border"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src =
-                            "https://placehold.co/100x100/EEE/31343C?text=No+Image";
-                        }}
-                      />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {item.itemId}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {item.itemName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {item.category}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {item.brand}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {item.location}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {item.lostDate}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
-                      {item.foundDate}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {item.username}
-                    </td>
-                  </tr>
-                ))}
+              <tbody className={theme === 'light' ? 'bg-white divide-y divide-gray-200' : 'bg-gray-800 divide-y divide-gray-700'}>
+                {itemList.length > 0 ? (
+                  itemList.map((item) => (
+                    <tr key={item.foundItemId} className={`${theme === 'light' ? 'hover:bg-gray-50' : 'hover:bg-gray-700'} cursor-pointer transition-colors`} onClick={() => setSelectedItem(item)}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{item.itemName}</td>
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'light' ? 'text-gray-700' : 'text-gray-200'}`}>{item.category}</td>
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'light' ? 'text-gray-700' : 'text-gray-200'}`}>{item.location}</td>
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'light' ? 'text-gray-700' : 'text-gray-200'}`}>{item.foundDate}</td>
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'light' ? 'text-gray-700' : 'text-gray-200'}`}>{item.username}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr><td colSpan="5" className="px-6 py-10 text-center text-gray-500">No found items reported.</td></tr>
+                )}
               </tbody>
             </table>
           </div>
-        )}
+        </div>
       </div>
+
+      {/* Industry Standard Modal */}
+      {selectedItem && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4 transition-opacity duration-300">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl flex flex-col sm:flex-row animate-scale-in">
+            <div className="w-full sm:w-2/5 bg-gray-100 rounded-t-lg sm:rounded-l-lg sm:rounded-t-none flex items-center justify-center p-6">
+              <img
+                src={selectedItem.imageUrl || "https://placehold.co/400x400/e2e8f0/cbd5e0?text=Image"}
+                alt={selectedItem.itemName}
+                className="max-h-80 w-auto object-contain rounded-md"
+              />
+            </div>
+
+            <div className="w-full sm:w-3/5 p-6 flex flex-col">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <span className="text-xs font-bold bg-green-100 text-green-800 px-3 py-1 rounded-full uppercase tracking-wider">
+                    Found Item
+                  </span>
+                  <h2 className="text-3xl font-bold text-gray-900 mt-2">{selectedItem.itemName}</h2>
+                </div>
+                <button onClick={() => setSelectedItem(null)} className="text-gray-400 hover:text-gray-700">
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 my-4 flex-grow">
+                <DetailItem label="Category" value={selectedItem.category} />
+                <DetailItem label="Brand" value={selectedItem.brand} />
+                <DetailItem label="Color" value={selectedItem.color} />
+                <DetailItem label="Location Found" value={selectedItem.location} />
+                <DetailItem label="Date Found" value={selectedItem.foundDate} />
+              </div>
+
+              <div className="border-t border-gray-200 pt-4 mt-auto">
+                <div className="flex items-center gap-3">
+                  <User size={24} className="text-gray-500" />
+                  <div>
+                    <p className="text-xs text-gray-500">Reported By</p>
+                    <p className="font-semibold text-gray-800">{selectedItem.username} ({selectedItem.userEmail})</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
